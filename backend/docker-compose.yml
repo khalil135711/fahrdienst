@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: fahrdienst
+      POSTGRES_USER: fahrdienst
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    restart: unless-stopped
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://fahrdienst:${DB_PASSWORD}@db:5432/fahrdienst
+      JWT_SECRET: ${JWT_SECRET:?Bitte JWT_SECRET in .env setzen}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?Bitte ADMIN_EMAIL in .env setzen}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Bitte ADMIN_PASSWORD in .env setzen}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      DISPATCH_RADIUS_M: 5000   # Suchradius für Fahrer in Metern
+      OFFER_SECONDS: 15         # Zeit zum Annehmen, danach nächster Fahrer
+    depends_on: [db, redis]
+    ports: ["8060:8000"]
+  # Zum Testen erreichbar auf Port 8000; in Produktion nur hinter HTTPS-Proxy
+    restart: unless-stopped
+volumes:
+  pgdata:
