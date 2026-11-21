@@ -2,7 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../services/api_service.dart';
+<<<<<<< HEAD
 import '../services/auth_store.dart';
+=======
+>>>>>>> origin/main
 
 class DriverHome extends StatefulWidget {
   const DriverHome({super.key});
@@ -14,6 +17,7 @@ class _DriverHomeState extends State<DriverHome> {
   final _api = ApiService();
   bool _free = false;
   StreamSubscription<Position>? _sub;
+<<<<<<< HEAD
   Timer? _poll;
   Map<String, dynamic>? _offer;
   Map<String, dynamic>? _active;
@@ -98,12 +102,34 @@ class _DriverHomeState extends State<DriverHome> {
   void dispose() {
     _sub?.cancel();
     _poll?.cancel();
+=======
+
+  Future<void> _toggle(bool v) async {
+    setState(() => _free = v);
+    await _api.setDriverStatus(v);
+    if (v) {
+      await Geolocator.requestPermission();
+      _sub = Geolocator.getPositionStream(
+        locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high, distanceFilter: 20),
+      ).listen((p) => _api.sendLocation(
+          p.latitude, p.longitude, p.speed * 3.6)); // m/s -> km/h
+    } else {
+      await _sub?.cancel();
+    }
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+>>>>>>> origin/main
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+<<<<<<< HEAD
       appBar: AppBar(title: Text('Fahrer: ${AuthStore.name ?? ''}'), actions: [
         IconButton(
             tooltip: 'Abmelden',
@@ -217,6 +243,16 @@ class _DriverHomeState extends State<DriverHome> {
                         _do(() => _api.stopReached(id, next['position'])),
                     child: Text('Ziel ${next['position']} erreicht'))),
         ]),
+=======
+      appBar: AppBar(title: const Text('Fahrer-Modus')),
+      body: Center(
+        child: SwitchListTile(
+          title: Text(_free ? 'Ich bin FREI' : 'Ich bin OFFLINE'),
+          subtitle: const Text('Anfragen in Ihrer Nähe erhalten'),
+          value: _free,
+          onChanged: _toggle,
+        ),
+>>>>>>> origin/main
       ),
     );
   }

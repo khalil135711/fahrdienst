@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../services/api_service.dart';
+<<<<<<< HEAD
 import '../services/auth_store.dart';
+=======
+>>>>>>> origin/main
 import 'tracking_screen.dart';
 
 const int maxStops = 4;
@@ -75,12 +78,16 @@ class _CustomerHomeState extends State<CustomerHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+<<<<<<< HEAD
       appBar: AppBar(title: Text('Hallo ${AuthStore.name ?? ''}'), actions: [
         IconButton(
             tooltip: 'Abmelden',
             icon: const Icon(Icons.logout),
             onPressed: AuthStore.logout),
       ]),
+=======
+      appBar: AppBar(title: const Text('Fahrt anfragen')),
+>>>>>>> origin/main
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [

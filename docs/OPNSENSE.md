@@ -16,7 +16,10 @@ Internet → OPNsense → VLAN App:   API-Server (nur 443)
 | alles andere | Datenbank | * | blockieren |
 
 Kein Port-Forward auf 5432. Tägliche Backups auf ein externes System.
+<<<<<<< HEAD
 
 ## HTTPS
 
 Die App sendet Anmelde-Token und Passwörter. Betreiben Sie die API deshalb nur über HTTPS (Reverse Proxy mit Zertifikat, zum Beispiel Caddy oder Nginx im App-VLAN). Siehe `AUTH.md`.
+=======
+>>>>>>> origin/main

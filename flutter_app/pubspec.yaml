@@ -12,8 +12,13 @@ dependencies:
   http: ^1.2.0
   geolocator: ^12.0.0
   google_maps_flutter: ^2.6.0
+<<<<<<< HEAD
   provider: ^6.1.2
   flutter_secure_storage: ^9.2.2
+=======
+  web_socket_channel: ^2.4.0
+  provider: ^6.1.2
+>>>>>>> origin/main
 
 dev_dependencies:
   flutter_test:

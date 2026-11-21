@@ -8,7 +8,10 @@ Ein System für den eigenen Kunden-Fahrdienst: Kunden fordern eine Fahrt an, der
 
 - **Kunde:** Fahrt anfragen, Fahrer mit Bewertung und ETA sehen, Live-Tracking, Fahrer bewerten
 - **Fahrer:** Status *frei/offline*, Anfragen in der Nähe annehmen oder ablehnen, Position und Geschwindigkeit werden übertragen
+<<<<<<< HEAD
 - **Anmeldung:** Login mit Rollen (Kunde, Fahrer, Admin), Details in [docs/AUTH.md](docs/AUTH.md)
+=======
+>>>>>>> origin/main
 - **Admin:** Live-Karte, gefahrene Kilometer, Geschwindigkeit, Fahrtenanzahl, Bewertungen, Warnungen
 - **Abfahrt und Ziele:** Die Abfahrt ist automatisch der aktuelle GPS-Standort des Kunden. Pro Fahrt sind **1 bis 4 Ziele** möglich, die der Reihe nach angefahren werden. Der Fahrer meldet jedes erreichte Ziel, nach dem letzten endet die Fahrt.
 - **Zuweisung:** Anfrage geht an den nächsten freien Fahrer im Umkreis (5 km), bei Ablehnung oder Timeout an den nächsten
@@ -62,7 +65,11 @@ fahrdienst/
 
 ```bash
 cd backend
+<<<<<<< HEAD
 cp .env.example .env        # ALLE Werte ändern: Passwörter, JWT_SECRET (openssl rand -hex 32), Admin-Zugang
+=======
+cp .env.example .env        # Passwort ändern!
+>>>>>>> origin/main
 docker compose up -d
 # API: http://localhost:8000/docs
 ```
@@ -92,6 +99,7 @@ Die API-Adresse wird beim Start übergeben (es gibt keine echte Domain im Code):
 
 **Fehler „failed to fetch“?** Prüfen: Läuft das Backend (`http://localhost:8000/health` im Browser)? Stimmt die IP, und erlaubt die Firewall Port 8000? Bei Klartext-HTTP auf Android 9+ in `AndroidManifest.xml` `android:usesCleartextTraffic="true"` setzen (nur zum Testen, in Produktion HTTPS verwenden).
 
+<<<<<<< HEAD
 Google-Maps-Schlüssel nach Bedarf eintragen. Beim ersten Start legt das Backend das Admin-Konto aus `ADMIN_EMAIL` und `ADMIN_PASSWORD` in `.env` an. Fahrer legt der Admin in der App an, Kunden registrieren sich selbst.
 
 ## So testen Sie den Ablauf (Admin, Fahrer, Kunde)
@@ -113,6 +121,9 @@ Google-Maps-Schlüssel nach Bedarf eintragen. Beim ersten Start legt das Backend
 6. Beim Fahrer erscheint die Anfrage mit Countdown (15 Sek.). **Annehmen** ordnet die Fahrt zu, **Ablehnen** oder Ablauf schaltet zum nächsten Fahrer weiter. Danach „Kunde abgeholt“ und pro Ziel „Ziel N erreicht“. Der Admin sieht Status, Fahrten, Kilometer und Geschwindigkeit des Fahrers, der Kunde kann bewerten.
 
 **Bekommt der Fahrer keine Anfrage?** Er muss auf FREI stehen, seine Position gemeldet haben und höchstens `DISPATCH_RADIUS_M` (Standard 5 km) vom Kunden entfernt sein. Zum Testen am selben Rechner ist der Abstand fast null.
+=======
+Google-Maps-Schlüssel nach Bedarf eintragen. Das Backend legt beim ersten Start Testdaten an (`backend/seed.sql`: ein Kunde, ein freier Fahrer in Bonn).
+>>>>>>> origin/main
 
 ## Screenshots ersetzen
 
@@ -124,11 +135,18 @@ Google-Maps-Schlüssel nach Bedarf eintragen. Beim ersten Start legt das Backend
 
 - [ ] Zielsuche mit Adressvorschlägen (Geocoding), damit `lat`/`lng` der Ziele automatisch gesetzt werden
 - [ ] Route und ETA über alle Ziele hinweg berechnen
+<<<<<<< HEAD
 - [x] Login mit Rollen (JWT, bcrypt, Sperre nach Fehlversuchen)
 - [ ] Passwort selbst ändern, Passwort vergessen, Zwei-Faktor für Admins
 - [ ] Push-Benachrichtigung (Firebase) statt Abfrage alle 2 Sekunden (Polling)
 - [ ] Google-Map-Widget und Live-Marker im Tracking-Screen
 - [ ] Echtzeit per WebSocket statt Polling, Live-Position des Fahrers auf der Karte
+=======
+- [ ] Login und JWT-Authentifizierung mit Rollen
+- [ ] Anfrage nacheinander per Push (Firebase) an Fahrer senden, 15-Sek.-Timeout
+- [ ] Google-Map-Widget und Live-Marker im Tracking-Screen
+- [ ] WebSocket-Endpunkt `/ws/rides/{id}` im Backend
+>>>>>>> origin/main
 - [ ] ETA-Berechnung (Google Directions, Mapbox oder OSRM)
 - [ ] Admin-Dashboard (React) mit echten Daten
 - [ ] Geschwindigkeitswarnungen und Statistik-Auswertungen

@@ -8,6 +8,10 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+<<<<<<< HEAD
+=======
+      - ./seed.sql:/docker-entrypoint-initdb.d/02_seed.sql:ro
+>>>>>>> origin/main
     restart: unless-stopped
   redis:
     image: redis:7-alpine
@@ -16,6 +20,7 @@ services:
     build: .
     environment:
       DATABASE_URL: postgresql://fahrdienst:${DB_PASSWORD}@db:5432/fahrdienst
+<<<<<<< HEAD
       JWT_SECRET: ${JWT_SECRET:?Bitte JWT_SECRET in .env setzen}
       ADMIN_EMAIL: ${ADMIN_EMAIL:?Bitte ADMIN_EMAIL in .env setzen}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Bitte ADMIN_PASSWORD in .env setzen}
@@ -24,6 +29,10 @@ services:
       OFFER_SECONDS: 15         # Zeit zum Annehmen, danach nächster Fahrer
     depends_on: [db, redis]
     ports: ["8060:8000"]
+=======
+    depends_on: [db, redis]
+    ports: ["8069:8000"]
+>>>>>>> origin/main
   # Zum Testen erreichbar auf Port 8000; in Produktion nur hinter HTTPS-Proxy
     restart: unless-stopped
 volumes:

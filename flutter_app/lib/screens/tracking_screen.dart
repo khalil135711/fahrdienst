@@ -1,8 +1,17 @@
+<<<<<<< HEAD
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 
 /// Fragt alle 2 Sekunden den Status der Fahrt ab (Fahrer, ETA, Ziele).
+=======
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+import '../services/api_service.dart';
+
+/// Zeigt ETA und Live-Status der Fahrt über WebSocket.
+>>>>>>> origin/main
 class TrackingScreen extends StatefulWidget {
   final int rideId;
   const TrackingScreen({super.key, required this.rideId});
@@ -11,21 +20,31 @@ class TrackingScreen extends StatefulWidget {
 }
 
 class _TrackingScreenState extends State<TrackingScreen> {
+<<<<<<< HEAD
   final _api = ApiService();
   Timer? _timer;
   Map<String, dynamic>? _ride;
   String? _error;
   bool _rated = false;
+=======
+  late final WebSocketChannel _ch;
+>>>>>>> origin/main
 
   @override
   void initState() {
     super.initState();
+<<<<<<< HEAD
     _refresh();
     _timer = Timer.periodic(const Duration(seconds: 2), (_) => _refresh());
+=======
+    _ch = WebSocketChannel.connect(
+        Uri.parse('$wsBaseUrl/ws/rides/${widget.rideId}'));
+>>>>>>> origin/main
   }
 
   @override
   void dispose() {
+<<<<<<< HEAD
     _timer?.cancel();
     super.dispose();
   }
@@ -142,4 +161,40 @@ class _TrackingScreenState extends State<TrackingScreen> {
             ]),
         ],
       );
+=======
+    _ch.sink.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Ihre Fahrt')),
+      body: StreamBuilder(
+        stream: _ch.stream,
+        builder: (context, snap) {
+          if (!snap.hasData) {
+            return const Center(child: Text('Fahrer wird gesucht …'));
+          }
+          final d = jsonDecode(snap.data as String);
+          return Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // TODO: GoogleMap-Widget mit Marker für d['lat'], d['lng']
+                Text('Fahrer kommt in ${d['eta_minutes']} Min.',
+                    style: const TextStyle(
+                        fontSize: 28, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Text('${d['driver_name']}  ★ ${d['driver_rating']}'),
+                Text('${d['vehicle']}'),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+>>>>>>> origin/main
 }

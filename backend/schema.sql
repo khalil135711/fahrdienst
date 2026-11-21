@@ -6,9 +6,12 @@ CREATE TABLE users (
   email TEXT UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
   role TEXT NOT NULL CHECK (role IN ('customer','driver','admin')),
+<<<<<<< HEAD
   active BOOLEAN NOT NULL DEFAULT true,          -- false = Konto gesperrt
   failed_attempts INT NOT NULL DEFAULT 0,        -- Fehlversuche beim Login
   locked_until TIMESTAMPTZ,                      -- vorübergehende Sperre
+=======
+>>>>>>> origin/main
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -34,7 +37,11 @@ CREATE TABLE rides (
   customer_id INT REFERENCES users(id),
   driver_id INT REFERENCES drivers(user_id),
   status TEXT NOT NULL DEFAULT 'requested'
+<<<<<<< HEAD
     CHECK (status IN ('requested','accepted','arriving','in_progress','completed','cancelled','no_driver')),
+=======
+    CHECK (status IN ('requested','accepted','arriving','in_progress','completed','cancelled')),
+>>>>>>> origin/main
   pickup GEOGRAPHY(Point,4326) NOT NULL,
   distance_km NUMERIC(8,2),
   price NUMERIC(8,2),
@@ -54,6 +61,7 @@ CREATE TABLE ride_stops (
   UNIQUE (ride_id, position)
 );
 
+<<<<<<< HEAD
 -- Angebote: eine Anfrage geht nacheinander an einen Fahrer nach dem anderen (je OFFER_SECONDS)
 CREATE TABLE ride_offers (
   id SERIAL PRIMARY KEY,
@@ -65,6 +73,8 @@ CREATE TABLE ride_offers (
   UNIQUE (ride_id, driver_id)
 );
 
+=======
+>>>>>>> origin/main
 -- Positionsverlauf: Geschwindigkeit & Kilometer (nach Frist löschen, DSGVO!)
 CREATE TABLE location_log (
   id BIGSERIAL PRIMARY KEY,
