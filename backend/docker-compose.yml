@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: fahrdienst
+      POSTGRES_USER: fahrdienst
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./seed.sql:/docker-entrypoint-initdb.d/02_seed.sql:ro
+    restart: unless-stopped
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://fahrdienst:${DB_PASSWORD}@db:5432/fahrdienst
+    depends_on: [db, redis]
+    ports: ["8069:8000"]
+  # Zum Testen erreichbar auf Port 8000; in Produktion nur hinter HTTPS-Proxy
+    restart: unless-stopped
+volumes:
+  pgdata:
