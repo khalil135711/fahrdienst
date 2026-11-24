@@ -1,0 +1,12 @@
+.env
+*.log
+# Flutter
+.dart_tool/
+build/
+.flutter-plugins*
+.packages
+*.iml
+.idea/
+# Python
+__pycache__/
+.venv/

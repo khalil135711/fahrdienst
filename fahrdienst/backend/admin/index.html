@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Fahrdienst – Administration</title>
+<link rel="stylesheet" href="/dashboard/static/leaflet.css">
+<style>
+:root{--bg:#f4f6fa;--card:#fff;--text:#1e222d;--muted:#6b7380;--line:#e3e7ee;--blue:#1a73e8;--green:#1e9e5a;--amber:#e69a0c;--red:#dc4638;--grey:#8a93a0}
+@media (prefers-color-scheme:dark){:root{--bg:#12151c;--card:#1b202b;--text:#e8ebf1;--muted:#98a1b0;--line:#2b3240;--blue:#5b9cf5;--green:#3cc17c;--amber:#f2b33d;--red:#f06b5e;--grey:#8a93a0}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select{font:inherit;color:inherit}
+header{display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:1000}
+header h1{font-size:18px;margin:0;flex:1}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:7px 12px;cursor:pointer}
+.btn:hover{border-color:var(--blue)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.danger{color:var(--red)}
+.btn.small{padding:3px 9px;font-size:13px}
+nav{display:flex;gap:4px;padding:10px 20px 0;overflow-x:auto}
+nav button{border:0;background:none;padding:9px 14px;border-radius:8px 8px 0 0;cursor:pointer;color:var(--muted);white-space:nowrap}
+nav button.on{background:var(--card);color:var(--text);font-weight:600;box-shadow:0 -1px 0 var(--line),1px 0 0 var(--line),-1px 0 0 var(--line)}
+main{padding:0 20px 40px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:0 12px 12px 12px;padding:18px;margin-top:-1px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:18px}
+.stat{background:var(--bg);border-radius:12px;padding:14px}
+.stat b{display:block;font-size:26px}
+.stat span{color:var(--muted);font-size:13px}
+.live{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+@media (max-width:900px){.live{grid-template-columns:1fr}}
+#map{height:480px;border-radius:12px;border:1px solid var(--line)}
+.list{max-height:480px;overflow:auto}
+.row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line)}
+.dot{width:11px;height:11px;border-radius:50%;flex:none;background:var(--grey)}
+.dot.free{background:var(--green)}.dot.busy{background:var(--amber)}.dot.blocked{background:var(--red)}
+.row small,.muted{color:var(--muted)}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:720px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;background:var(--bg);border:1px solid var(--line)}
+.badge.free,.badge.completed{color:var(--green)}.badge.busy,.badge.in_progress,.badge.accepted{color:var(--amber)}
+.badge.blocked,.badge.no_driver,.badge.cancelled{color:var(--red)}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.toolbar h2{margin:0;font-size:18px;flex:1}
+input,select{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+.toolbar input,.toolbar select{width:auto}
+.err{color:var(--red);margin:8px 0;min-height:1em}
+.stars{color:var(--amber);letter-spacing:1px}
+#login{max-width:380px;margin:12vh auto;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px}
+#login h1{margin:0 0 4px}
+label{display:block;margin:12px 0 4px;font-size:13px;color:var(--muted)}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text);width:min(420px,92vw);padding:22px}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:10px}
+.formgrid label{margin:0 0 4px}
+.check{display:flex;gap:8px;align-items:flex-start;margin:8px 0;font-size:14px}
+.check input{width:auto;margin-top:3px}
+h3{margin:22px 0 10px;font-size:16px}
+.note{background:var(--bg);border-left:3px solid var(--amber);padding:10px 12px;border-radius:0 8px 8px 0;margin:0 0 14px;font-size:14px}
+.ok{color:var(--green)}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<section id="login" class="hidden">
+  <h1>🚕 Fahrdienst</h1>
+  <p class="muted" style="margin-top:0">Administration</p>
+  <form id="loginForm" autocomplete="on">
+    <label for="email">E-Mail</label>
+    <input id="email" type="email" autocomplete="username" required>
+    <label for="password">Passwort</label>
+    <input id="password" type="password" autocomplete="current-password" required>
+    <div class="err" id="loginErr"></div>
+    <button class="btn primary" style="width:100%" type="submit">Anmelden</button>
+  </form>
+</section>
+
+<div id="app" class="hidden">
+  <header>
+    <h1>🚕 Fahrdienst – Administration</h1>
+    <span class="muted" id="who"></span>
+    <button class="btn" id="btnRefresh" title="Aktualisieren">⟳</button>
+    <button class="btn" id="btnLogout">Abmelden</button>
+  </header>
+  <nav id="tabs">
+    <button data-tab="live" class="on">Live</button>
+    <button data-tab="drivers">Fahrer</button>
+    <button data-tab="companies">Firmen</button>
+    <button data-tab="rides">Fahrten</button>
+    <button data-tab="ratings">Bewertungen</button>
+    <button data-tab="speed">Geschwindigkeit</button>
+    <button data-tab="music">Musik</button>
+    <button data-tab="news">Zeitungen</button>
+    <button data-tab="prices">Preise &amp; Teilen</button>
+  </nav>
+  <main>
+    <div class="err" id="globalErr"></div>
+
+    <div class="panel" id="tab-live">
+      <div class="cards" id="cards"></div>
+      <div class="live">
+        <div id="map"></div>
+        <div class="list" id="liveList"></div>
+      </div>
+    </div>
+
+    <div class="panel hidden" id="tab-drivers">
+      <div class="toolbar">
+        <h2>Fahrer</h2>
+        <select id="days" aria-label="Zeitraum">
+          <option value="7">letzte 7 Tage</option>
+          <option value="30" selected>letzte 30 Tage</option>
+          <option value="90">letzte 90 Tage</option>
+        </select>
+        <button class="btn primary" id="btnNew">+ Fahrer anlegen</button>
+      </div>
+      <div class="tablewrap"><table id="driversTable"></table></div>
+    </div>
+
+    <div class="panel hidden" id="tab-rides">
+      <div class="toolbar"><h2>Letzte Fahrten</h2></div>
+      <div class="tablewrap"><table id="ridesTable"></table></div>
+    </div>
+
+    <div class="panel hidden" id="tab-ratings">
+      <div class="toolbar"><h2>Bewertungen</h2></div>
+      <div class="tablewrap"><table id="ratingsTable"></table></div>
+    </div>
+
+    <div class="panel hidden" id="tab-speed">
+      <div class="toolbar">
+        <h2>Geschwindigkeitswarnungen</h2>
+        <label style="margin:0">Grenzwert</label>
+        <input id="limit" type="number" min="10" max="300" value="100" style="width:90px"> km/h
+        <select id="hours" aria-label="Zeitraum">
+          <option value="24">24 Stunden</option>
+          <option value="72">3 Tage</option>
+          <option value="168">7 Tage</option>
+        </select>
+      </div>
+      <p class="muted" style="margin-top:0">Die Werte meldet das Handy des Fahrers. Tempolimits der jeweiligen Straße kennt das System nicht, der Grenzwert gilt für alle Fahrten gleich.</p>
+      <div class="tablewrap"><table id="speedTable"></table></div>
+    </div>
+
+    <div class="panel hidden" id="tab-music">
+      <div class="toolbar"><h2>Musik im Fahrzeug</h2></div>
+      <p class="note"><b>Rechtehinweis:</b> Wer Fahrgästen Musik vorspielt, braucht dafür in der Regel eine Lizenz (zum Beispiel bei der GEMA) oder muss rechtefreie bzw. lizenzierte Musik verwenden. Private Streaming-Abos dürfen meist nicht gewerblich genutzt werden. Laden Sie nur Titel hoch, für die Sie die Rechte haben, und tragen Sie den Nachweis ein.</p>
+
+      <h3 style="margin-top:0">Bibliotheken (jede ist eine Playlist für die Fahrer)</h3>
+      <form id="libForm" class="toolbar">
+        <input name="name" placeholder="Name der Bibliothek" required minlength="2" maxlength="80">
+        <input name="description" placeholder="Beschreibung (optional)" maxlength="300" style="min-width:240px">
+        <button class="btn primary" type="submit">+ Bibliothek anlegen</button>
+      </form>
+      <div class="err" id="libErr"></div>
+      <div class="tablewrap"><table id="libTable"></table></div>
+
+      <h3>Titel hochladen</h3>
+      <form id="uploadForm">
+        <div class="formgrid">
+          <div><label>Bibliothek</label><select name="library_id" id="uploadLib" required></select></div>
+          <div><label>Datei (MP3, M4A, OGG oder WAV, max. 30 MB)</label><input name="file" type="file" accept=".mp3,.m4a,.ogg,.wav" required></div>
+          <div><label>Titel (optional, sonst aus der Datei)</label><input name="title" maxlength="150"></div>
+          <div><label>Künstler (optional)</label><input name="artist" maxlength="150"></div>
+          <div style="grid-column:1/-1"><label>Lizenznachweis (Pflicht)</label><input name="license_note" required minlength="3" maxlength="300" placeholder="z. B. Lizenz-Nr. 12345 von Anbieter X, oder: Eigene Aufnahme"></div>
+        </div>
+        <label class="check"><input type="checkbox" id="rightsOk" required> <span>Ich bestätige, dass wir die Rechte haben, diese Musik im Fahrzeug abzuspielen.</span></label>
+        <button class="btn primary" type="submit">Hochladen</button>
+        <span class="err" id="uploadErr"></span>
+      </form>
+
+      <h3>Titel</h3>
+      <div class="toolbar"><select id="trackFilter" aria-label="Bibliothek filtern"></select></div>
+      <div class="tablewrap"><table id="trackTable"></table></div>
+    </div>
+
+    <div class="panel hidden" id="tab-news">
+      <div class="toolbar"><h2>Zeitungen für Kunden</h2></div>
+      <p class="note">Kunden sehen die Schlagzeilen <b>nur während einer laufenden Fahrt</b>. Der Server holt aus dem RSS/Atom-Feed nur Titel, Link und Kurztext. Den Artikel öffnet die App auf der Webseite der Zeitung (Bezahlschranken gelten weiter). Prüfen Sie die Nutzungsbedingungen des jeweiligen Verlags für die Feed-Nutzung im gewerblichen Umfeld.</p>
+      <form id="newsForm" class="toolbar">
+        <input name="name" placeholder="Name der Zeitung" required minlength="2" maxlength="80">
+        <input name="feed_url" type="url" placeholder="https://… (RSS- oder Atom-Feed)" required style="min-width:300px">
+        <button class="btn primary" type="submit">+ Zeitung hinzufügen</button>
+      </form>
+      <div class="err" id="newsErr"></div>
+      <div class="tablewrap"><table id="newsTable"></table></div>
+      <h3>Vorschau</h3>
+      <div id="newsPreview" class="muted">Wählen Sie bei einer Zeitung „Vorschau“.</div>
+    </div>
+
+    <div class="panel hidden" id="tab-prices">
+      <div class="toolbar"><h2>Preise und geteilte Fahrten</h2></div>
+      <p class="note"><b>Wie das Teilen Kosten spart:</b> Fahrgäste, die „Fahrt teilen“ wählen, zahlen den eingestellten Rabatt weniger. Das System legt sie nur zusammen, wenn kein Fahrgast zu viel Umweg hat und mindestens 20 % der Einzelstrecke gespart werden. Das Zusammenlegen verringert Ihre gefahrenen Kilometer pro Fahrgast. Die Ersparnis sehen Sie unter „Live“. Entfernungen sind Schätzungen (Luftlinie × 1,3), keine echte Routenberechnung.</p>
+      <p class="note"><b>Rechtlicher Hinweis:</b> In Deutschland kann das Bündeln von Fahrgästen (Pooling) und die Preisgestaltung genehmigungspflichtig sein (Personenbeförderungsgesetz, gebündelter Bedarfsverkehr, örtliche Tarifvorgaben). Klären Sie das vor dem Einsatz mit Ihrer Genehmigungsbehörde. Die Standardpreise sind nur Platzhalter.</p>
+      <form id="priceForm">
+        <div class="formgrid" id="priceFields"></div>
+        <button class="btn primary" type="submit">Speichern</button>
+        <span id="priceMsg" class="muted"></span>
+      </form>
+    </div>
+
+    <div class="panel hidden" id="tab-companies">
+      <div class="toolbar"><h2>Partnerfirmen</h2></div>
+      <p class="note">Partnerfirmen bieten ihre Fahrer über Ihre Plattform an. Der Kunde zahlt bei einer Fahrt mit einem Partnerfahrer nur Ihre <b>Servicegebühr</b> (Standard 3 bis 6 €, je nach Strecke) und rechnet den Fahrpreis direkt mit dem Fahrer ab. Die Firma zahlt Ihnen <b>pro beendeter Fahrt</b> eine Gebühr (Standard 3 €, pro Firma änderbar). Kunden müssen Partnerfahrer bei der Buchung erlauben. Die Fahrer der Firma legen Sie unter „Fahrer“ an und wählen die Firma aus.</p>
+      <form id="companyForm" class="toolbar">
+        <input name="name" placeholder="Firmenname" required minlength="2" maxlength="80">
+        <input name="contact" placeholder="Ansprechpartner / Telefon" maxlength="200">
+        <input name="address" placeholder="Anschrift" maxlength="200" style="min-width:220px">
+        <input name="fee_per_ride" type="number" step="0.01" min="0" max="50" placeholder="Gebühr/Fahrt (leer = Standard)" style="width:210px">
+        <button class="btn primary" type="submit">+ Firma hinzufügen</button>
+      </form>
+      <div class="err" id="companyErr"></div>
+      <div class="tablewrap"><table id="companyTable"></table></div>
+      <h3>Monatsabrechnung</h3>
+      <div id="statementBox" class="muted">Wählen Sie bei einer Firma „Abrechnung“.</div>
+    </div>
+  </main>
+</div>
+
+<dialog id="dlgCreate">
+  <form id="createForm" method="dialog">
+    <h3 style="margin-top:0">Fahrer anlegen</h3>
+    <label>Name</label><input name="name" required minlength="2">
+    <label>E-Mail</label><input name="email" type="email" required>
+    <label>Start-Passwort (mind. 8 Zeichen)</label><input name="password" required minlength="8" autocomplete="new-password">
+    <label>Fahrzeug</label><input name="vehicle_model" required placeholder="z. B. Mercedes E-Klasse">
+    <label>Kennzeichen</label><input name="plate" required>
+    <label>Fahrzeugtyp</label>
+    <select name="vehicle_type"><option value="normal">Normalfahrzeug</option><option value="wheelchair">Rollstuhlfahrzeug</option></select>
+    <label>Gehört zu</label>
+    <select name="company_id" id="createCompany"></select>
+    <div class="err" id="createErr"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+      <button class="btn" type="button" id="createCancel">Abbrechen</button>
+      <button class="btn primary" type="submit">Anlegen</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlgPw">
+  <form id="pwForm" method="dialog">
+    <h3 style="margin-top:0" id="pwTitle">Neues Passwort</h3>
+    <label>Neues Passwort (mind. 8 Zeichen)</label><input name="password" required minlength="8" autocomplete="new-password">
+    <div class="err" id="pwErr"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+      <button class="btn" type="button" id="pwCancel">Abbrechen</button>
+      <button class="btn primary" type="submit">Speichern</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="/dashboard/static/leaflet.js"></script>
+<script src="/dashboard/static/app.js"></script>
+</body>
+</html>
